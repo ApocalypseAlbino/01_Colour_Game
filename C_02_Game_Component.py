@@ -25,12 +25,13 @@ def get_colours():
 
     file = open("00_colour_list_hex_v3(in).csv", "r")
     all_colours = list(csv.reader(file, delimiter=","))
+    file.close()
 
 
 def get_round_colours():
     """
     Choose four colours from larger list ensuring that the scores are all different
-    :return: list of colours an score to beat (median of scores)
+    :return: list of colours and score to beat (median of scores)
     """
     # Retrieve colours from csv file and put them in a list
     file = open("00_colour_list_hex_v3(in).csv", "r")
@@ -52,18 +53,15 @@ def get_round_colours():
             round_colours.append(potential_colour)
             colour_scores.append(potential_colour[1])
 
-    print(round_colours)
-    print(colour_scores)
-
-    # find target score (median)
-
-    # change scores into integers
+    # Find target score (median)
     int_scores = [int(x) for x in colour_scores]
     int_scores.sort()
 
+    # Calculate the median
     median = (int_scores[1] + int_scores[2]) / 2
     median = round_ans(median)
-    print("median", median)
+
+    return round_colours, median  # Return both the colours and the median
 
 
 class StartGame:
@@ -164,6 +162,22 @@ class Play:
     """
 
     def __init__(self, how_many):
+
+        # Integers / String Variables
+        self.target_score = IntVar()
+
+        # rounds played - start with zero
+        self.rounds_played = IntVar()
+        self.rounds_played.set(0)
+
+        self.rounds_wanted = IntVar()
+        self.rounds_wanted.set(how_many)
+
+        # Colour lists and score list
+        self.round_colour_list = []
+        self.all_scores_list = []
+        self.all_medians_list = []
+
         self.play_box = Toplevel()
 
         self.game_frame = Frame(self.play_box)
@@ -242,6 +256,39 @@ class Play:
                                       command=self.close_play,
                                       width=18)
         self.end_game_button.grid(row=7, pady=10)
+
+        # Once interface has been created, invoke new round function for first round
+        self.new_round()
+
+    def new_round(self):
+        """
+        Chooses four colours, works out median for score to beat. Configures buttons
+        with chosen colours
+        """
+
+        # retrieve number of rounds played, add one to it and configure heading
+        rounds_played = self.rounds_played.get()
+        rounds_played += 1
+        self.rounds_played.set(rounds_played)
+
+        rounds_wanted = self.rounds_wanted.get()
+
+        # get round colours and median score...
+        self.round_colour_list, median = get_round_colours()
+
+        self.target_score.set(median)
+
+        # Update heading, and score to beat labels. "Hide" results label
+        self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_wanted}")
+        self.score_to_beat_label.config(text=f"Target Score: {median}", font=("Arial", "14", "bold"))
+        self.result_label.config(text=f"{'=' * 7}", bg="#f0f0f0")
+
+        # configure buttons using foreground and background colours from list
+        # enable colour buttons (disabled at the end of the last round)
+        for count, item in enumerate(self.colour_ref_list):
+            item.config(fg=self.round_colour_list[count][2],
+                        bg=self.round_colour_list[count][0],
+                        text=self.round_colour_list[count][0], state=NORMAL)
 
     def close_play(self):
         # Reshow root (ie: choose rounds) and end current game / allow new game to start
