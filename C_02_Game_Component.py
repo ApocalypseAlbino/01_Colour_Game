@@ -210,14 +210,15 @@ class Play:
         # List to hold buttons once they have been made
         self.colour_ref_list = []
 
-        for item in colour_details_list:
-            self.make_button = Button(self.colour_frame,
-                                      text=item[0], bg=item[1],
-                                      fg="#000", font=("Arial", "12"),
-                                      width=12, command=item[2])
-            self.make_button.grid(row=item[3], column=item[4], padx=5, pady=5)
-
-            self.colour_ref_list.append(self.make_button)
+        # Create four buttons in a 2 x 2 grid
+        for item in range(0, 4):
+            self.color_button = Button(self.colour_frame, font="Arial 12",
+                                       text="Colour Name", width=15,
+                                       command=partial(self.round_results, item))
+            self.color_button.grid(row=item // 2,
+                                   column=item % 2,
+                                   padx=5, pady=5)
+            self.colour_ref_list.append(self.color_button)
 
         self.result_label = Label(self.game_frame, text="You chose, result",
                                   font=("Arial", "12"), bg="#d8e4d6")
@@ -242,7 +243,6 @@ class Play:
 
         # List to hold buttons once they have been made
         self.button_ref_list = []
-
         for item in button_details_list:
             self.make_button = Button(self.button_frame,
                                       text=item[0], bg=item[1],
@@ -250,12 +250,17 @@ class Play:
                                       width=8, command=item[2])
             self.make_button.grid(row=item[3], column=item[4], padx=6)
 
+            self.button_ref_list.append(self.make_button)
+
         self.end_game_button = Button(self.game_frame, text="End Game",
                                       font=("Arial", "16", "bold"),
                                       fg="#fff", bg="#990000",
                                       command=self.close_play,
                                       width=18)
         self.end_game_button.grid(row=7, pady=10)
+
+        self.hints_button = self.button_ref_list[0]
+        self.stats_button = self.button_ref_list[1]
 
         # Once interface has been created, invoke new round function for first round
         self.new_round()
@@ -289,6 +294,33 @@ class Play:
             item.config(fg=self.round_colour_list[count][2],
                         bg=self.round_colour_list[count][0],
                         text=self.round_colour_list[count][0], state=NORMAL)
+
+        self.next_round_button.config(state=DISABLED)
+
+    def round_results(self, user_choice):
+        """
+        Retrieves which button was pushed (index 0-3), retrieves
+        score and then compares it within median, updates results
+        and adds itself to the stats list
+        """
+
+        # Get user score and colour based on button press
+        score = int(self.round_colour_list[user_choice][1])
+
+        # alternate way to get button name. Good for if buttons have been scrambled
+        colour_name = self.colour_ref_list[user_choice].cget('text')
+
+        # retrieve target score and compare with user score to find round result
+        target = self.target_score.get()
+
+        if score >= target:
+            result_text = f"Success! {colour_name} earned you {score} points"
+            result_bg = "#82b366"
+        else:
+            result_text = f"Oops {colour_name} ({score}) is less than the target"
+            result_bg = "#f8cecc"
+
+        self.result_label.config(text=result_text, bg=result_bg)
 
     def close_play(self):
         # Reshow root (ie: choose rounds) and end current game / allow new game to start
