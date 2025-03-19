@@ -139,6 +139,8 @@ class StartGame:
             rounds_wanted = int(rounds_wanted)
             if rounds_wanted > 0:
                 # Invoke Play Class (and take across number of rounds)
+                self.num_rounds_entry.delete(0, END)
+                self.choose_label.config(text="How many rounds do you want to play?")
                 Play(rounds_wanted)
                 # Hide root window (ieL hide rounds choice window)
                 root.withdraw()
@@ -227,7 +229,7 @@ class Play:
         self.next_round_button = Button(self.game_frame, text="Next Round",
                                         font=("Arial", "16", "bold"),
                                         fg="#fff", bg="#0050cb",
-                                        command="",
+                                        command=self.new_round,
                                         width=18)
         self.next_round_button.grid(row=5, pady=10)
 
@@ -261,6 +263,8 @@ class Play:
 
         self.hints_button = self.button_ref_list[0]
         self.stats_button = self.button_ref_list[1]
+
+        self.stats_button.config(state=DISABLED)
 
         # Once interface has been created, invoke new round function for first round
         self.new_round()
@@ -312,15 +316,34 @@ class Play:
 
         # retrieve target score and compare with user score to find round result
         target = self.target_score.get()
+        self.all_medians_list.append(target)
 
         if score >= target:
             result_text = f"Success! {colour_name} earned you {score} points"
             result_bg = "#82b366"
+            self.all_scores_list.append(score)
+
         else:
             result_text = f"Oops {colour_name} ({score}) is less than the target"
             result_bg = "#f8cecc"
+            self.all_scores_list.append(0)
 
         self.result_label.config(text=result_text, bg=result_bg)
+
+        # enable stats and next buttons, disable colour buttons
+        self.next_round_button.config(state=NORMAL)
+        self.stats_button.config(state=NORMAL)
+
+        # check to see if game is over
+        rounds_played = self.rounds_played.get()
+        rounds_wanted = self.rounds_wanted.get()
+
+        if rounds_played == rounds_wanted:
+            self.next_round_button.config(state=DISABLED, text="Game Over")
+            self.end_game_button.config(text="Play Again", bg="#006600")
+
+        for item in self.colour_ref_list:
+            item.config(state=DISABLED)
 
     def close_play(self):
         # Reshow root (ie: choose rounds) and end current game / allow new game to start
