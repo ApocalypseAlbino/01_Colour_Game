@@ -178,7 +178,6 @@ class Play:
         # Colour lists and score list
         self.round_colour_list = []
         self.all_scores_list = []
-        self.all_medians_list = []
         self.all_high_score_list = []
 
         self.play_box = Toplevel()
@@ -318,7 +317,6 @@ class Play:
 
         # retrieve target score and compare with user score to find round result
         target = self.target_score.get()
-        self.all_medians_list.append(target)
 
         if score >= target:
             result_text = f"Success! {colour_name} earned you {score} points"
@@ -333,7 +331,6 @@ class Play:
         self.result_label.config(text=result_text, bg=result_bg)
 
         print("all scores:", self.all_scores_list)
-        print("all medians:", self.all_medians_list)
         print("highest scores:", self.all_high_score_list)
 
         # enable stats and next buttons, disable colour buttons
