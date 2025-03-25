@@ -7,7 +7,7 @@ from functools import partial  # To prevent unwanted windows
 def round_ans(val):
     """
     Rounds numbers to nearest integer
-    :param val: number to be rounded
+    :param val: number to be rounded.
     :return: rounded number
     """
     var_rounded = (val * 2 + 1) // 2
@@ -24,7 +24,6 @@ def get_colours():
     """
 
     file = open("00_colour_list_hex_v3(in).csv", "r")
-    all_colours = list(csv.reader(file, delimiter=","))
     file.close()
 
 
@@ -60,8 +59,9 @@ def get_round_colours():
     # Calculate the median
     median = (int_scores[1] + int_scores[2]) / 2
     median = round_ans(median)
+    highest = int_scores[-1]
 
-    return round_colours, median  # Return both the colours and the median
+    return round_colours, median, highest
 
 
 class StartGame:
@@ -179,6 +179,7 @@ class Play:
         self.round_colour_list = []
         self.all_scores_list = []
         self.all_medians_list = []
+        self.all_high_score_list = []
 
         self.play_box = Toplevel()
 
@@ -231,7 +232,7 @@ class Play:
 
         # buttons (text | bg colour | command | row | column)
         button_details_list = [
-            ["Hints", "#da7200", "", 0, 0],
+            ["Hints", "#da7200", self.to_hints, 0, 0],
             ["Stats", "#2b2a26", "", 0, 1],
         ]
 
@@ -261,6 +262,12 @@ class Play:
         # Once interface has been created, invoke new round function for first round
         self.new_round()
 
+    def to_hints(self):
+        """
+        Displays hints for playing game
+        """
+        DisplayHelp(self)
+
     def new_round(self):
         """
         Chooses four colours, works out median for score to beat. Configures buttons
@@ -275,9 +282,12 @@ class Play:
         rounds_wanted = self.rounds_wanted.get()
 
         # get round colours and median score...
-        self.round_colour_list, median = get_round_colours()
+        self.round_colour_list, median, highest = get_round_colours()
 
         self.target_score.set(median)
+
+        # add high score to list for stats...
+        self.all_high_score_list.append(highest)
 
         # Update heading, and score to beat labels. "Hide" results label
         self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_wanted}")
@@ -322,6 +332,10 @@ class Play:
 
         self.result_label.config(text=result_text, bg=result_bg)
 
+        print("all scores:", self.all_scores_list)
+        print("all medians:", self.all_medians_list)
+        print("highest scores:", self.all_high_score_list)
+
         # enable stats and next buttons, disable colour buttons
         self.next_round_button.config(state=NORMAL)
         self.stats_button.config(state=NORMAL)
@@ -341,6 +355,65 @@ class Play:
         # Reshow root (ie: choose rounds) and end current game / allow new game to start
         root.deiconify()
         self.play_box.destroy()
+
+
+class DisplayHelp:
+
+    def __init__(self, partner):
+
+        # set up dialogue box and background color
+        background = "#ffe6cc"
+        self.help_box = Toplevel()
+
+        # disable button
+        partner.hints_button.config(state=DISABLED)
+
+        # If users press 'X' instead of dismiss, unblocks help button
+        self.help_box.protocol('WM_DELETE_WINDOW',
+                               partial(self.close_help, partner))
+
+        self.help_frame = Frame(self.help_box, width=300,
+                                height=200)
+        self.help_frame.grid()
+
+        self.help_heading_label = Label(self.help_frame,
+                                        text="Hints",
+                                        font=("Arial", "14", "bold"))
+        self.help_heading_label.grid(row=0)
+
+        help_text = "The score for each colour relates to it's hexadecimal code." \
+                    "\n\n" \
+                    "Remember, the hex code for white is #FFFFFF - which is the best possible score." \
+                    "\n\n" \
+                    "The hex code for black is #000000 which is the worst possible score." \
+                    "\n\n" \
+                    "The first colour in the code is red, so if you had to choose between red (#FF0000), " \
+                    "green (#00FF00) and blue (#0000FF), then red would be the best choice." \
+                    "\n\n" \
+                    "Good Luck!"
+
+        self.help_text_label = Label(self.help_frame,
+                                     text=help_text, wraplength=350,
+                                     justify="left")
+        self.help_text_label.grid(row=1, padx=10)
+
+        self.dismiss_button = Button(self.help_frame,
+                                     font=("Arial", "12", "bold"),
+                                     text="Dismiss", bg="#cc6600",
+                                     fg="#fff",
+                                     command=partial(self.close_help, partner))
+        self.dismiss_button.grid(row=2, padx=10, pady=10)
+
+        # List of everything to put background colour on
+        recolour_list = (self.help_frame, self.help_heading_label,
+                         self.help_text_label)
+
+        for item in recolour_list:
+            item.config(bg=background)
+
+    def close_help(self, partner):
+        partner.hints_button.config(state=NORMAL)  # Re-enable the button
+        self.help_box.destroy()
 
 
 # main routine
