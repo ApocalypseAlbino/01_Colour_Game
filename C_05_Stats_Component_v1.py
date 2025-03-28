@@ -1,5 +1,3 @@
-import csv
-import random
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
 
@@ -51,9 +49,9 @@ class Play:
         # Lists for stats component
 
         # # Highest Score Test Data...
-        self.all_scores_list = [20, 20, 20, 16, 19]
-        self.all_high_score_List = [20, 20, 20, 16, 19]
-        self.rounds_won.set(5)
+        # self.all_scores_list = [20, 20, 20, 16, 19]
+        # self.all_high_score_List = [20, 20, 20, 16, 19]
+        # self.rounds_won.set(5)
 
         # # Lowest Score Test Data...
         # self.all_scores_list = [0, 0, 0, 0, 0]
@@ -61,9 +59,9 @@ class Play:
         # self.rounds_won.set(0)
 
         # Random Score Test Data...
-        # self.all_scores_list = [0, 15, 16, 0, 16]
-        # self.all_high_score_List = [20, 19, 18, 20, 20]
-        # self.rounds_won.set(3)
+        self.all_scores_list = [0, 15, 16, 0, 16]
+        self.all_high_score_List = [20, 19, 18, 20, 20]
+        self.rounds_won.set(3)
 
         self.play_box = Toplevel()
 
