@@ -187,6 +187,9 @@ class Play:
         self.game_frame = Frame(self.play_box)
         self.game_frame.grid(padx=10, pady=10)
 
+        # If users press the 'x' on the game window, end the entire game!
+        self.play_box.protocol('WM_DELETE_WINDOW', root.destroy)
+
         self.game_heading_label = Label(self.game_frame, text=f"Round 0 of {how_many}",
                                         font=("Arial", "16", "bold"))
         self.game_heading_label.grid(row=0, pady=10)
@@ -267,7 +270,8 @@ class Play:
         """
         Displays hints for playing game
         """
-        DisplayHelp(self)
+        rounds_played = self.rounds_played.get()
+        DisplayHelp(self, rounds_played)
 
     def new_round(self):
         """
@@ -381,7 +385,8 @@ class Play:
 
 class DisplayHelp:
 
-    def __init__(self, partner):
+    def __init__(self, partner, rounds_played):
+        self.rounds_played = rounds_played
 
         # set up dialogue box and background color
         background = "#ffe6cc"
@@ -389,6 +394,9 @@ class DisplayHelp:
 
         # disable button
         partner.hints_button.config(state=DISABLED)
+        partner.end_game_button.config(state=DISABLED)
+        partner.stats_button.config(state=DISABLED)
+        partner.next_round_button.config(state=DISABLED)
 
         # If users press 'X' instead of dismiss, unblocks help button
         self.help_box.protocol('WM_DELETE_WINDOW',
@@ -435,6 +443,13 @@ class DisplayHelp:
 
     def close_help(self, partner):
         partner.hints_button.config(state=NORMAL)  # Re-enable the button
+        partner.end_game_button.config(state=NORMAL)
+        partner.next_round_button.config(state=NORMAL)
+
+        # only enable stats button if we have played any rounds
+        if self.rounds_played == 0:
+            partner.stats_button.config(state=NORMAL)
+
         self.help_box.destroy()
 
 
@@ -454,6 +469,9 @@ class Stats:
 
         # disable button
         partner.stats_button.config(state=DISABLED)
+        partner.hints_button.config(state=DISABLED)
+        partner.end_game_button.config(state=DISABLED)
+        partner.next_round_button.config(state=DISABLED)
 
         # If users press 'X' instead of dismiss, unblocks stat button
         self.stat_box.protocol('WM_DELETE_WINDOW',
@@ -532,6 +550,10 @@ class Stats:
 
     def close_stat(self, partner):
         partner.stats_button.config(state=NORMAL)  # Re-enable the button
+        partner.hints_button.config(state=NORMAL)
+        partner.end_game_button.config(state=NORMAL)
+        partner.next_round_button.config(state=NORMAL)
+
         self.stat_box.destroy()
 
 
