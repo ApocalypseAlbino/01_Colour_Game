@@ -344,8 +344,19 @@ class Play:
         rounds_played = self.rounds_played.get()
         rounds_wanted = self.rounds_wanted.get()
 
+        rounds_won = self.rounds_won.get()
+
         if rounds_played == rounds_wanted:
+            success_rate = rounds_won / rounds_played * 100
+            success_string = (f"Success Rate: {rounds_won} / {rounds_played}"
+                              f" ({success_rate:.0f}%)")
+
+            # Configure 'end game' labels / buttons
+            self.game_heading_label.config(text="Game Over")
+            self.score_to_beat_label.config(text=success_string)
+            self.instruction_label.config(text="Please click the stats button for more info")
             self.next_round_button.config(state=DISABLED, text="Game Over")
+            self.stats_button.config(bg="#990000")
             self.end_game_button.config(text="Play Again", bg="#006600")
 
         for item in self.colour_ref_list:
